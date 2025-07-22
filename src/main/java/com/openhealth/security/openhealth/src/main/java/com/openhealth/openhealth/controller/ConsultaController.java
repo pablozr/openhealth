@@ -4,6 +4,7 @@ import com.openhealth.openhealth.dto.consulta.ConsultaCreateDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaReagendarDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaResponseDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaUpdateDTO;
+import com.openhealth.openhealth.dto.consulta.DisponibilidadeResponseDTO;
 import com.openhealth.openhealth.service.ConsultaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -62,5 +64,10 @@ public class ConsultaController {
     @GetMapping("/paciente/{cpfPaciente}")
     public ResponseEntity<List<ConsultaResponseDTO>> findByPacienteCpf(@PathVariable @Pattern(regexp = "^\\d{11}$", message = "CPF deve conter 11 dígitos numéricos") String cpfPaciente) {
         return ResponseEntity.ok(service.findByPacienteCpf(cpfPaciente));
+    }
+
+    @GetMapping("/disponibilidade/{medicoId}")
+    public ResponseEntity<DisponibilidadeResponseDTO> getDisponibilidade(@PathVariable Long medicoId, @RequestParam(required = false) LocalDateTime inicio, @RequestParam(required = false) LocalDateTime fim) {
+        return ResponseEntity.ok(service.getDisponibilidade(medicoId, inicio, fim));
     }
 } 
