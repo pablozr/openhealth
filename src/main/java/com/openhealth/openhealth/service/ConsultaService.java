@@ -49,12 +49,6 @@ public class ConsultaService {
         return new ConsultaResponseDTO(consulta.getId(), consulta.getData(), consulta.getMedico().getId(), consulta.getPaciente().getCpf(), consulta.getStatus());
     }
 
-    public List<ConsultaResponseDTO> findAll() {
-        return repository.findAll().stream()
-                .map(c -> new ConsultaResponseDTO(c.getId(), c.getData(), c.getMedico().getId(), c.getPaciente().getCpf(), c.getStatus()))
-                .collect(Collectors.toList());
-    }
-
     public ConsultaResponseDTO update(Long id, ConsultaUpdateDTO dto) {
         Consulta consulta = repository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
         if (dto.cpfPaciente() != null) {

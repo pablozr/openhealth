@@ -33,11 +33,6 @@ public class ConsultaController {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    @GetMapping
-    public ResponseEntity<List<ConsultaResponseDTO>> findAll() {
-        return ResponseEntity.ok(service.findAll());
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<ConsultaResponseDTO> update(@PathVariable Long id, @RequestBody @Valid ConsultaUpdateDTO dto) {
         return ResponseEntity.ok(service.update(id, dto));

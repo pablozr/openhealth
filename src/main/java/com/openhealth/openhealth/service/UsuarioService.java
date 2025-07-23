@@ -23,9 +23,10 @@ public class UsuarioService {
 
     public UsuarioResponseDTO create(UsuarioCreateDTO dto) {
         Usuario usuario = new Usuario();
+        String roleUpper = dto.role().toUpperCase();
         usuario.setUsername(dto.username());
         usuario.setPassword(passwordEncoder.encode(dto.password()));
-        usuario.setRole(dto.role());
+        usuario.setRole("ROLE_" + roleUpper);
         repository.save(usuario);
         return new UsuarioResponseDTO(usuario.getId(), usuario.getUsername(), usuario.getRole());
     }
