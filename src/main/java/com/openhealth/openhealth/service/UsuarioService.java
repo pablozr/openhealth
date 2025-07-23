@@ -6,6 +6,10 @@ import com.openhealth.openhealth.dto.usuario.UsuarioUpdateDTO;
 import com.openhealth.openhealth.entity.Usuario;
 import com.openhealth.openhealth.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,15 @@ public class UsuarioService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     public UsuarioResponseDTO create(UsuarioCreateDTO dto) {
         Usuario usuario = new Usuario();
@@ -49,6 +62,12 @@ public class UsuarioService {
         if (dto.role() != null) usuario.setRole(dto.role());
         repository.save(usuario);
         return new UsuarioResponseDTO(usuario.getId(), usuario.getUsername(), usuario.getRole());
+    }
+
+    public String login(String username, String password) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return jwtService.generateToken(userDetails);
     }
 
     public void delete(Long id) {
