@@ -33,6 +33,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers("/usuarios/**").hasRole("ADMIN")
                 .requestMatchers("/medicos/**", "/pacientes/**", "/consultas/**").hasRole("RECEPCIONISTA")
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**", "/swagger-resources/**", "/configuration/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
