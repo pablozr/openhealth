@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class UsuarioController {
     private UsuarioService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Criar um usuário", description = "Cria um novo usuário")
     @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso")
     @ApiResponse(responseCode = "400", description = "Erro ao criar usuário")
@@ -35,7 +37,8 @@ public class UsuarioController {
         return ResponseEntity.ok(service.create(dto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}")    
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Buscar usuário por ID", description = "Busca um usuário pelo ID")
     @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
@@ -45,6 +48,7 @@ public class UsuarioController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Buscar todos os usuários", description = "Busca todos os usuários cadastrados")
     @ApiResponse(responseCode = "200", description = "Usuários encontrados com sucesso")
     @ApiResponse(responseCode = "401", description = "Não autorizado")
@@ -53,6 +57,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário existente")
     @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Erro ao atualizar usuário")
@@ -63,6 +68,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Deletar usuário", description = "Deleta um usuário existente")
     @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
@@ -73,6 +79,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
+    @PreAuthorize("permitAll()")
     @Operation(summary = "Login de usuário", description = "Realiza o login de um usuário")
     @ApiResponse(responseCode = "200", description = "Login realizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Erro ao realizar login")
