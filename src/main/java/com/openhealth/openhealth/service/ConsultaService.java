@@ -5,6 +5,7 @@ import com.openhealth.openhealth.dto.consulta.ConsultaReagendarDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaResponseDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaUpdateDTO;
 import com.openhealth.openhealth.dto.consulta.DisponibilidadeResponseDTO;
+import com.openhealth.openhealth.dto.consulta.HorarioConsultasDTO;
 import com.openhealth.openhealth.entity.Consulta;
 import com.openhealth.openhealth.entity.StatusConsulta;
 import com.openhealth.openhealth.repository.ConsultaRepository;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 public class ConsultaService {
 
     @Autowired
-    private ConsultaRepository repository;
+    private ConsultaRepository consultaRepository;
 
     @Autowired
     private PacienteRepository pacienteRepository;
@@ -40,17 +42,17 @@ public class ConsultaService {
         consulta.setMedico(medico);
         consulta.setPaciente(paciente);
         consulta.setStatus(StatusConsulta.AGENDADA);
-        repository.save(consulta);
+        consultaRepository.save(consulta);
         return new ConsultaResponseDTO(consulta.getId(), consulta.getData(), consulta.getMedico().getId(), consulta.getPaciente().getCpf(), consulta.getStatus());
     }
 
     public ConsultaResponseDTO findById(Long id) {
-        Consulta consulta = repository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
         return new ConsultaResponseDTO(consulta.getId(), consulta.getData(), consulta.getMedico().getId(), consulta.getPaciente().getCpf(), consulta.getStatus());
     }
 
     public ConsultaResponseDTO update(Long id, ConsultaUpdateDTO dto) {
-        Consulta consulta = repository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
         if (dto.cpfPaciente() != null) {
             var paciente = pacienteRepository.findByCpf(dto.cpfPaciente()).orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
             consulta.setPaciente(paciente);
@@ -61,29 +63,29 @@ public class ConsultaService {
         }
         if (dto.data() != null) consulta.setData(dto.data());
         if (dto.status() != null) consulta.setStatus(dto.status());
-        repository.save(consulta);
+        consultaRepository.save(consulta);
         return new ConsultaResponseDTO(consulta.getId(), consulta.getData(), consulta.getMedico().getId(), consulta.getPaciente().getCpf(), consulta.getStatus());
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        consultaRepository.deleteById(id);
     }
 
     public void reagendar(Long id, ConsultaReagendarDTO dto) {
-        Consulta consulta = repository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
         consulta.setData(dto.data());
-        repository.save(consulta);
+        consultaRepository.save(consulta);
     }
 
     public void cancelar(Long id) {
-        Consulta consulta = repository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
+        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new RuntimeException("Consulta não encontrada"));
         consulta.setStatus(StatusConsulta.CANCELADA);
-        repository.save(consulta);
+        consultaRepository.save(consulta);
     }
 
     public List<ConsultaResponseDTO> findByPacienteCpf(String cpfPaciente) {
         pacienteRepository.findByCpf(cpfPaciente).orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
-        List<Consulta> consultas = repository.findByPacienteCpf(cpfPaciente);
+        List<Consulta> consultas = consultaRepository.findByPacienteCpf(cpfPaciente);
         return consultas.stream() 
                 .map(c -> new ConsultaResponseDTO(c.getId(), c.getData(), c.getMedico().getId(), c.getPaciente().getCpf(), c.getStatus()))
                 .collect(Collectors.toList());
@@ -97,7 +99,7 @@ public class ConsultaService {
         LocalDateTime startData = inicio.withHour(9).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime endData = fim.withHour(18).withMinute(0).withSecond(0).withNano(0);
 
-        List<Consulta> consultas = repository.findByMedicoIdAndDataBetween(medicoId, startData, endData);
+        List<Consulta> consultas = consultaRepository.findByMedicoIdAndDataBetween(medicoId, startData, endData);
 
         Set<LocalDateTime> ocupados = consultas.stream()
                 .map(Consulta::getData)
@@ -119,4 +121,18 @@ public class ConsultaService {
         }
         return new DisponibilidadeResponseDTO(disponiveis);
     }
+
+        public List<HorarioConsultasDTO> getAgendaHoje() {
+            LocalDateTime hoje = LocalDateTime.now();
+            LocalDateTime inicio = hoje.withHour(9).withMinute(0).withSecond(0).withNano(0);
+            LocalDateTime fim = hoje.withHour(18).withMinute(0).withSecond(0).withNano(0);
+            return consultaRepository.findByDataBetween(inicio, fim)
+            .stream()
+            .map(c -> new ConsultaResponseDTO(c.getId(), c.getData(), c.getMedico().getId(), c.getPaciente().getCpf(), c.getStatus()))
+            .collect(Collectors.groupingBy(c -> c.data().format(DateTimeFormatter.ofPattern("HH:mm"))))
+            .entrySet()
+            .stream()
+            .map(e -> new HorarioConsultasDTO(e.getKey(), e.getValue()))
+            .collect(Collectors.toList());
+        }
 } 

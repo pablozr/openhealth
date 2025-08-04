@@ -9,4 +9,5 @@ import java.util.List;
 public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     List<Consulta> findByPacienteCpf(String cpfPaciente);
     List<Consulta> findByMedicoIdAndDataBetween(Long medicoId, LocalDateTime inicio, LocalDateTime fim);
+    List<Consulta> findByDataBetween(LocalDateTime inicio, LocalDateTime fim);
 } 

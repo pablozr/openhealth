@@ -5,6 +5,7 @@ import com.openhealth.openhealth.dto.consulta.ConsultaReagendarDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaResponseDTO;
 import com.openhealth.openhealth.dto.consulta.ConsultaUpdateDTO;
 import com.openhealth.openhealth.dto.consulta.DisponibilidadeResponseDTO;
+import com.openhealth.openhealth.dto.consulta.HorarioConsultasDTO;
 import com.openhealth.openhealth.service.ConsultaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -101,5 +102,14 @@ public class ConsultaController {
     @GetMapping("/disponibilidade/{medicoId}")
     public ResponseEntity<DisponibilidadeResponseDTO> getDisponibilidade(@PathVariable Long medicoId, @RequestParam(required = false) LocalDateTime inicio, @RequestParam(required = false) LocalDateTime fim) {
         return ResponseEntity.ok(service.getDisponibilidade(medicoId, inicio, fim));
+    }
+
+    @GetMapping("/hoje")
+    @Operation(summary = "Buscar consultas do dia atual", description = "Busca todas as consultas do dia atual")
+    @ApiResponse(responseCode = "200", description = "Consultas encontradas com sucesso")
+    @ApiResponse(responseCode = "400", description = "Erro ao buscar consultas")
+    @ApiResponse(responseCode = "401", description = "Não autorizado")
+    public ResponseEntity<List<HorarioConsultasDTO>> getAgendaHoje() {
+        return ResponseEntity.ok(service.getAgendaHoje());
     }
 } 
